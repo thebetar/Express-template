@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"outDir": "dist",
+		"esModuleInterop": true,
+		"target": "ESNext",
+		"noImplicitAny": true,
+		"moduleResolution": "node",
+		"sourceMap": true,
+		"removeComments": true,
+		"module": "commonjs"
+	}
+}
