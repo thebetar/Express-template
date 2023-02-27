@@ -1,4 +1,5 @@
 import fs, { WriteStream } from 'fs';
+import path from 'path';
 
 export class Logger {
 	private name: string;
@@ -10,9 +11,9 @@ export class Logger {
 	constructor(name: string) {
 		this.name = name;
 
-		this.info_log = fs.createWriteStream('../../logs/info.log', { flags: 'w' });
-		this.warn_log = fs.createWriteStream('../../logs/warn.log', { flags: 'w' });
-		this.error_log = fs.createWriteStream('../../logs/error.log', { flags: 'w' });
+		this.info_log = fs.createWriteStream(path.join(__dirname, '../../logs/info.log'), { flags: 'w' });
+		this.warn_log = fs.createWriteStream(path.join(__dirname, '../../logs/info.log'), { flags: 'w' });
+		this.error_log = fs.createWriteStream(path.join(__dirname, '../../logs/info.log'), { flags: 'w' });
 	}
 
 	public info(info: string) {
