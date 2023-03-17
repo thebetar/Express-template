@@ -1,36 +1,63 @@
-import { AppRepository } from './../repositories/app.repository';
+import { compare, hash } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
+
+import { UserRepository } from '../repositories/user.repository';
 
 export class AppService {
-	private appRepository: AppRepository;
+	private userRepository: UserRepository;
 
 	constructor() {
-		this.appRepository = new AppRepository();
+		this.userRepository = new UserRepository();
 	}
 
-	public sendHelloWorld() {
-		return 'Hello world';
+	public sendTestMessage() {
+		return 'Server is working!';
 	}
 
-	public login(body: any) {
+	public async login(body: any) {
 		if (body.username && body.password) {
-			return this.appRepository.login(body.username, body.password);
+			const user = await this.userRepository.getByUsername(body.username);
+
+			if (user && (await compare(body.password, user.password))) {
+				return {
+					token: sign({ id: user._id }, process.env.JWT_SECRET, {
+						expiresIn: '1d',
+					}),
+				};
+			} else {
+				throw new Error('Invalid username or password', {
+					cause: {
+						statusCode: 400,
+					},
+				});
+			}
 		} else {
 			throw new Error('Missing username or password', {
 				cause: {
-					statusCode: 400
-				}
+					statusCode: 400,
+				},
 			});
 		}
 	}
 
-	public register(body: any) {
+	public async register(body: any) {
 		if (body.username && body.password) {
-			return this.appRepository.register(body.username, body.password);
+			const password = await hash(body.password, 10);
+			const user = await this.userRepository.create({
+				username: body.username,
+				password,
+			});
+
+			return {
+				token: sign({ id: user._id }, process.env.JWT_SECRET, {
+					expiresIn: '1d',
+				}),
+			};
 		} else {
 			throw new Error('Missing username or password', {
 				cause: {
-					statusCode: 400
-				}
+					statusCode: 400,
+				},
 			});
 		}
 	}
