@@ -3,8 +3,9 @@ import { Application, Router } from 'express';
 import { AppService } from '../services/app.service';
 
 import { Logger } from '../utils/logger';
-import { body } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import AuthMiddleware from '../middlewares/auth.middleware';
+import { errorHandler as errorCheck, errorHandler } from '../utils/error';
 
 export default class AppController {
 	private logger: Logger;
@@ -27,7 +28,7 @@ export default class AppController {
 				res.status(200).send(message);
 			} catch (error: any) {
 				this.logger.error(error.stack);
-				res.status(error.cause.statusCode || 500).send('Internal Server Error');
+				res.status(error?.cause?.statusCode || 500).send('Internal Server Error');
 			}
 		});
 
@@ -38,35 +39,47 @@ export default class AppController {
 				res.status(200).send(message);
 			} catch (error: any) {
 				this.logger.error(error.stack);
-				res.status(error.cause.statusCode || 500).send('Internal Server Error');
+				res.status(error?.cause?.statusCode || 500).send('Internal Server Error');
 			}
 		});
 
-		this.router.post('/login', body('username').isEmail(), body('password').isLength({ min: 6 }), (req, res) => {
-			try {
-				const body = req.body;
+		this.router.post(
+			'/login',
+			body('username').isEmail(),
+			body('password').isLength({ min: 6 }),
+			errorHandler,
+			async (req, res) => {
+				try {
+					const body = req.body;
 
-				const message = this.appService.login(body);
+					const message = await this.appService.login(body);
 
-				res.status(200).send(message);
-			} catch (error: any) {
-				this.logger.error(error.stack);
-				res.status(error.cause.statusCode || 500).send('Internal Server Error');
-			}
-		});
+					res.status(200).send(message);
+				} catch (error: any) {
+					this.logger.error(error.stack);
+					res.status(error?.cause?.statusCode || 500).send('Internal Server Error');
+				}
+			},
+		);
 
-		this.router.post('/register', body('username').isEmail(), body('password').isLength({ min: 6 }), (req, res) => {
-			try {
-				const body = req.body;
+		this.router.post(
+			'/register',
+			body('username').isEmail(),
+			body('password').isLength({ min: 6 }),
+			errorHandler,
+			async (req, res) => {
+				try {
+					const body = req.body;
 
-				const message = this.appService.register(body);
+					const message = await this.appService.register(body);
 
-				res.status(200).send(message);
-			} catch (error: any) {
-				this.logger.error(error.stack);
-				res.status(error.cause.statusCode || 500).send('Internal Server Error');
-			}
-		});
+					res.status(200).send(message);
+				} catch (error: any) {
+					this.logger.error(error.stack);
+					res.status(error?.cause?.statusCode || 500).send('Internal Server Error');
+				}
+			},
+		);
 
 		app.use('/', this.router);
 	}

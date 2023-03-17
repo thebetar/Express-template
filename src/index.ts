@@ -25,11 +25,12 @@ bootstrapControllers([ApplicationController]);
 app.listen(PORT, async () => {
 	await connectToDb();
 
-	console.log(`Server started on port ${PORT}`);
+	console.log(`[Server] Server started on port ${PORT}`);
 });
 
 async function connectToDb() {
 	await mongoose.connect(process.env.DATABASE_URL || 'mongodb://localhost:27017/test'); // TODO change to correct database
+	console.log('[Database] Connected');
 }
 
 function bootstrapControllers(list: any[]) {
